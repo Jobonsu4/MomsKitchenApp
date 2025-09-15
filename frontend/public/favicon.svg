@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Mom's Kitchen">
+  <!-- Background badge -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f97316"/>
+      <stop offset="1" stop-color="#fb7185"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="48" fill="url(#g)"/>
+
+  <!-- Bowl -->
+  <path d="M20 56c0 12 13 22 30 22s30-10 30-22H20z" fill="#ffffff" opacity="0.95"/>
+  <path d="M20 56h60" stroke="#e11d48" stroke-width="2" opacity="0.6"/>
+
+  <!-- Steam -->
+  <path d="M38 30c-4 6 4 6 0 12" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+  <path d="M50 28c-4 6 4 6 0 12" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+  <path d="M62 30c-4 6 4 6 0 12" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+
+  <!-- Ladle handle hint -->
+  <path d="M74 42c4-4 8-6 10-4" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+</svg>

@@ -9,14 +9,17 @@ import './App.css'
 function App() {
   const [landing, setLanding] = useState(true)
   const [view, setView] = useState<'menu' | 'checkout' | 'lookup' | 'admin'>('menu')
+  const landingBg = (import.meta as any).env.VITE_LANDING_BG as string | undefined
 
   if (landing) {
     return (
-      <div className="container">
-        <h1>Mom&apos;s Kitchen</h1>
-        <div className="hero">
-          <p>Homestyle Ghanaian meals — fresh for pickup.</p>
-          <button onClick={() => { setLanding(false); setView('menu') }}>View Menu</button>
+      <div className="landing-bg" style={landingBg ? { backgroundImage: `url(${landingBg})` } : { backgroundImage: 'url(/img/jollof.jpg)' }}>
+        <div className="container landing">
+          <h1>Mom&apos;s Kitchen</h1>
+          <div className="hero">
+            <p>Homestyle Ghanaian meals — fresh for pickup.</p>
+            <button onClick={() => { setLanding(false); setView('menu') }}>View Menu</button>
+          </div>
         </div>
       </div>
     )

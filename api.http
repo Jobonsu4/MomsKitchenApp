@@ -1,0 +1,220 @@
+### Mom's Kitchen API Examples (for VS Code REST Client / IntelliJ HTTP)
+###
+### Usage:
+### - Install VS Code "REST Client" extension or use IntelliJ HTTP client
+### - Click "Send Request" above a request block
+
+@host = http://localhost:8080
+@adminKey = changeme
+@customerPhone = 3025550123
+@orderId = 1
+
+### Pickup validation notes
+### - Times are interpreted in the configured zone (default UTC).
+### - Ensure pickupTime is in the future and inside slot window.
+### - Seeded slots: (1) Fri 16:00–19:00, (2) Sat 12:00–15:00, (3) Sun 12:00–15:00.
+
+@slotFri = 1
+@slotSat = 2
+@slotSun = 3
+
+### Far-future example times to avoid "past" errors
+@pickupTimeFri = 2031-06-13T16:30:00
+@pickupTimeSat = 2031-06-14T12:30:00
+@pickupTimeSun = 2031-06-15T12:30:00
+
+###
+### Menu
+###
+
+### List menus
+GET {{host}}/api/menu/menus
+
+### Get full menu tree (categories + items + allowed addons)
+GET {{host}}/api/menu/1/tree
+
+### Items in a category
+GET {{host}}/api/menu/categories/1/items
+
+###
+### Orders (customer)
+###
+
+### Quote a cart — minimal (no time, no addons)
+POST {{host}}/api/orders/quote
+Content-Type: application/json
+
+{
+  "customerName": "Test",
+  "customerEmail": "test@example.com",
+  "customerPhone": "302-555-0123",
+  "pickupSlotId": 1,
+  "pickupDay": 5,
+  "items": [
+    { "menuItemId": 1, "quantity": 1 }
+  ]
+}
+
+### Create an order — minimal (no time, no addons)
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{
+  "customerName": "Test",
+  "customerEmail": "test@example.com",
+  "customerPhone": "302-555-0123",
+  "pickupSlotId": 1,
+  "pickupDay": 5,
+  "items": [
+    { "menuItemId": 1, "quantity": 1 }
+  ]
+}
+
+### Quote a cart — no pickupTime (dev-friendly)
+POST {{host}}/api/orders/quote
+Content-Type: application/json
+
+{
+  "customerName": "Test",
+  "customerEmail": "test@example.com",
+  "customerPhone": "302-555-0123",
+  "pickupSlotId": 1,
+  "pickupDay": 5,
+  "items": [
+    { "menuItemId": 1, "quantity": 1, "addons": [{ "addonId": 1 }] }
+  ]
+}
+
+### Create an order — no pickupTime (dev-friendly)
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{
+  "customerName": "Test",
+  "customerEmail": "test@example.com",
+  "customerPhone": "302-555-0123",
+  "pickupSlotId": 1,
+  "pickupDay": 5,
+  "items": [
+    { "menuItemId": 1, "quantity": 1, "addons": [{ "addonId": 1 }] }
+  ]
+}
+
+### Quote a cart (no DB writes) — Friday slot example
+POST {{host}}/api/orders/quote
+Content-Type: application/json
+
+{
+  "customerName": "Josiah Bonsu",
+  "customerEmail": "josiah@example.com",
+  "customerPhone": "{{customerPhone}}",
+  "pickupDay": 5,
+  "pickupSlotId": {{slotFri}},
+  "pickupTime": "{{pickupTimeFri}}",
+
+  "paymentMethod": "CASH",
+  "paymentStatus": "PENDING",
+
+  "items": [
+    {
+      "menuItemId": 1,
+      "quantity": 2,
+      "addons": [
+        { "addonId": 1 },
+        { "addonId": 2 }
+      ]
+    }
+  ]
+}
+
+### Quote a cart — Saturday slot example
+POST {{host}}/api/orders/quote
+Content-Type: application/json
+
+{
+  "customerName": "Josiah Bonsu",
+  "customerEmail": "josiah@example.com",
+  "customerPhone": "{{customerPhone}}",
+
+  "pickupDay": 6,
+  "pickupSlotId": {{slotSat}},
+  "pickupTime": "{{pickupTimeSat}}",
+
+  "paymentMethod": "CASH",
+  "paymentStatus": "PENDING",
+
+  "items": [
+    { "menuItemId": 4, "quantity": 2, "addons": [] }
+  ]
+}
+
+### Quote a cart — Sunday slot example
+POST {{host}}/api/orders/quote
+Content-Type: application/json
+
+{
+  "customerName": "Josiah Bonsu",
+  "customerEmail": "josiah@example.com",
+  "customerPhone": "{{customerPhone}}",
+
+  "pickupDay": 0,
+  "pickupSlotId": {{slotSun}},
+  "pickupTime": "{{pickupTimeSun}}",
+
+  "paymentMethod": "CASH",
+  "paymentStatus": "PENDING",
+
+  "items": [
+    { "menuItemId": 6, "quantity": 1, "addons": [] }
+  ]
+}
+
+### Create an order (persists + returns summary with orderCode) — Friday slot example (no pickupTime)
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{
+  "customerName": "Josiah Bonsu",
+  "customerEmail": "josiah@example.com",
+  "customerPhone": "{{customerPhone}}",
+
+  "pickupDay": 5,
+  "pickupSlotId": {{slotSun}},
+
+  "paymentMethod": "CASH",
+  "paymentStatus": "PENDING",
+
+  "items": [
+    {
+      "menuItemId": 1,
+      "quantity": 2,
+      "addons": [
+        { "addonId": 1 },
+        { "addonId": 2 }
+      ]
+    }
+  ]
+}
+
+### Lookup an order (replace ORDER_CODE with real code from create response)
+GET {{host}}/api/orders/ORDER_CODE?phone={{customerPhone}}
+
+###
+### Admin (secured with X-Admin-Key)
+###
+
+### List orders (filters optional: status, paymentStatus; paging params standard Spring)
+GET {{host}}/api/admin/orders?size=20&sort=createdAt,desc
+X-Admin-Key: {{adminKey}}
+
+### Order details by id
+GET {{host}}/api/admin/orders/{{orderId}}
+X-Admin-Key: {{adminKey}}
+
+### Update order status
+PUT {{host}}/api/admin/orders/{{orderId}}/status/CONFIRMED
+X-Admin-Key: {{adminKey}}
+
+### Update payment status
+PUT {{host}}/api/admin/orders/{{orderId}}/payment/PAID
+X-Admin-Key: {{adminKey}}
