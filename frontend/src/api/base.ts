@@ -59,9 +59,28 @@ export function del<T>(path: string, headers: HeadersMap = {}): Promise<T> {
   return request<T>(path, { method: 'DELETE', headers });
 }
 
-// Helper for admin API header
-export function adminHeaders(): HeadersMap {
-  const key = (import.meta as any).env.VITE_ADMIN_KEY as string;
-  return key ? { 'X-Admin-Key': key } : {};
+// Admin auth helpers: store/get admin key (password) from localStorage, fallback to env
+export function getAdminKey(): string | undefined {
+  try {
+    const ls = typeof localStorage !== 'undefined' ? localStorage.getItem('adminKey') : null;
+    if (ls && ls.trim()) return ls.trim();
+  } catch {}
+  const envKey = (import.meta as any).env.VITE_ADMIN_KEY as string | undefined;
+  return envKey && String(envKey).trim() ? String(envKey).trim() : undefined;
 }
 
+export function setAdminKey(value: string) {
+  try { if (typeof localStorage !== 'undefined') localStorage.setItem('adminKey', value || ''); } catch {}
+}
+
+export function clearAdminKey() {
+  try { if (typeof localStorage !== 'undefined') localStorage.removeItem('adminKey'); } catch {}
+}
+
+export function isAdminAuthed(): boolean { return !!getAdminKey(); }
+
+// Helper for admin API header
+export function adminHeaders(): HeadersMap {
+  const key = getAdminKey();
+  return key ? { 'X-Admin-Key': key } : {};
+}

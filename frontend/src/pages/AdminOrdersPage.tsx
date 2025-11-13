@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { AdminApi } from '../api'
 import type { Page, OrderListItemDTO, OrderSummaryDTO } from '../api'
 
-export default function AdminOrdersPage() {
+export default function AdminOrdersPage({ onLogout }: { onLogout?: () => void }) {
   const [page, setPage] = useState<Page<OrderListItemDTO> | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -50,7 +50,10 @@ export default function AdminOrdersPage() {
   return (
     <div>
       <h2>Admin — Orders</h2>
-      <div className="notice">Ensure VITE_ADMIN_KEY is set; requests send X-Admin-Key.</div>
+      <div className="notice">Authenticated as admin; requests send X-Admin-Key.</div>
+      {onLogout && (
+        <button style={{ float: 'right', marginTop: -36 }} onClick={onLogout}>Sign out</button>
+      )}
       {loading && <div className="notice">Loading…</div>}
       {error && <div className="error">{error}</div>}
 

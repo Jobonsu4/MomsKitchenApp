@@ -4,7 +4,7 @@
 ### - Install VS Code "REST Client" extension or use IntelliJ HTTP client
 ### - Click "Send Request" above a request block
 
-@host = http://localhost:8080
+@host = http://localhost:8081
 @adminKey = changeme
 @customerPhone = 3025550123
 @orderId = 1

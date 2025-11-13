@@ -1,14 +1,18 @@
 import { useState } from 'react'
 import AdminOrdersPage from './pages/AdminOrdersPage'
+import AdminLoginPage from './pages/AdminLoginPage'
 import MenuPage from './pages/MenuPage'
 import CheckoutPage from './pages/CheckoutPage'
 import LookupPage from './pages/LookupPage'
 import { CartProvider, useCart } from './context/CartContext'
 import './App.css'
 
+import { isAdminAuthed, clearAdminKey } from './api/base'
+
 function App() {
   const [landing, setLanding] = useState(true)
   const [view, setView] = useState<'menu' | 'checkout' | 'lookup' | 'admin'>('menu')
+  const [adminAuthed, setAdminAuthed] = useState<boolean>(isAdminAuthed())
   const landingBg = (import.meta as any).env.VITE_LANDING_BG as string | undefined
 
   if (landing) {
@@ -34,7 +38,10 @@ function App() {
         {view === 'menu' && <MenuPage onViewCheckout={() => setView('checkout')} />}
         {view === 'checkout' && <CheckoutPage />}
         {view === 'lookup' && <LookupPage />}
-        {view === 'admin' && <AdminOrdersPage />}
+        {view === 'admin' && (adminAuthed
+          ? <AdminOrdersPage onLogout={() => { clearAdminKey(); setAdminAuthed(false); }} />
+          : <AdminLoginPage onSuccess={() => setAdminAuthed(true)} />
+        )}
       </div>
     </CartProvider>
   )

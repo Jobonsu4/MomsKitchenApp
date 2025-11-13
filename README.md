@@ -31,6 +31,24 @@ An **Admin page** is included to review orders, mark them paid/unpaid, update st
 - **Infra (MVP):** Local MySQL; images served from `/frontend/public/img/*`  
   (easy to migrate to S3/Cloudinary later)
 
+  [ MenuPage ]      [ CheckoutPage ]     [ LookupPage ]     [ AdminOrdersPage ]
+      │                   │                   │                    │
+      └──────────────► [ CartContext ] ◄──────┘                    │
+                            │                                     │
+                            ▼                                     ▼
+                        [ API Layer ]  (src/api/)
+                        ┌─────────────┐
+                        │ base.ts     │  <- common setup (base URL, headers)
+                        │ menu.ts     │  <- fetch menu + categories
+                        │ orders.ts   │  <- place/check orders
+                        │ admin.ts    │  <- admin actions
+                        └─────────────┘
+                            │
+                            ▼
+                        [ Backend ]
+                  (Spring Boot / Database)
+
+
 ---
 
 ## Repository Layout
@@ -111,6 +129,28 @@ Note: In dev, Vite serves assets under `public/` at the site root. So a file at 
 
 ---
 
+## Screenshots
+
+Below are a few visual examples embedded directly from the repo. You can swap these with real UI screenshots at any time.
+
+<div align="center">
+
+<img src=" />
+<img src="" />
+
+</div>
+
+Add your own screenshots
+- Take screenshots in your browser (Menu, Checkout, Admin).
+- Save them under `docs/screenshots/` (recommended) or `frontend/public/img/`.
+- Embed in this README with repo‑relative paths, for example:
+  - Markdown: `![Checkout](docs/screenshots/checkout.png)`
+  - HTML with width: `<img src="docs/screenshots/checkout.png" alt="Checkout" width="600">`
+
+Tip: Keep files < 1MB and use JPG/WebP for smaller size.
+
+---
+
 ## Backend
 
 The backend is a Spring Boot 3 service that exposes a small REST API and uses JPA/Hibernate for persistence.
@@ -170,7 +210,7 @@ React + Vite + TypeScript. The app hits the backend through a small API layer un
 
 ### Environment
 Create `frontend/.env` with:
-- `VITE_API_URL`: backend base URL (e.g., `http://localhost:8080`)
+- `VITE_API_URL`: backend base URL (e.g., `http://localhost:8081`)
 - `VITE_ADMIN_KEY`: admin API key (required for admin actions)
 - `VITE_SHOW_ADMIN`: `true` to show the Admin tab in the UI
 - `VITE_CASHAPP_TAG`: your Cash App tag (e.g., `$momsKitchen`) to show deep links
@@ -219,6 +259,27 @@ Prereqs: Java 17+, Node 18+, Docker (for MySQL), Maven.
 
 ---
 
+## Production Deploy (Docker + XO server)
+
+The stack runs as three containers: `mysql` (internal), `backend` (Spring Boot on 8081), and `web` (nginx serving the built frontend and proxying `/api` to the backend). Only port `80` on `web` is published.
+
+Steps
+- Provision a VM in Xen Orchestra (Ubuntu 22.04+), assign a static IP, and open port 80 in the firewall/security group.
+- Install Docker Engine and Compose plugin on the VM.
+- Copy the repo to the VM (or pull from your VCS).
+- Create a production env file from the example:
+  - `cp deploy/.env.prod.example .env.prod`
+  - Edit `.env.prod` and set strong values for `MYSQL_ROOT_PASSWORD` and `ADMIN_API_KEY`.
+- Build and start the stack:
+  - `docker compose --env-file ./.env.prod -f docker-compose.prod.yml up -d --build`
+- Access the app from any computer at `http://<server-ip>` (or via your domain if DNS is set).
+
+Notes
+- The frontend is served by nginx and calls the backend at `/api` (same-origin), so CORS is not required.
+- MySQL is not exposed publicly. Use Adminer only in local/dev.
+- To update the app: re-run the compose command with `--build` to rebuild images from your latest code.
+
+
 ## API Examples
 
 See `api.http` for runnable examples (VS Code REST Client / IntelliJ HTTP client). Highlights:
@@ -240,7 +301,7 @@ See `api.http` for runnable examples (VS Code REST Client / IntelliJ HTTP client
 - The frontend now parses both ISO strings and Jackson array dates.
 
 **CORS/API URL issues:**
-- Confirm `VITE_API_URL` points at your backend (e.g., `http://localhost:8080`).
+- Confirm `VITE_API_URL` points at your backend (e.g., `http://localhost:8081`).
 - Check `CorsConfig` in the backend if you change ports/origins.
 
 **Images not showing:**
